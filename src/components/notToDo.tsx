@@ -9,10 +9,10 @@ const sampleTasks = [
 export default function NotToDo() {
   return (
     <TaskColumn
-      title="Not To Do"
+      title="NOT TO DO"
       initialTasks={sampleTasks}
-      cardClassName="bg-red-50 border-red-200 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:bg-red-100"
-      titleClassName="text-sm font-semibold leading-none text-red-950"
+      cardClassName="bg-zinc-900 border-zinc-800 shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)] hover:border-red-500/30 rounded-xl group relative overflow-hidden"
+      titleClassName="text-sm font-bold tracking-wider text-zinc-300 group-hover:text-red-400 transition-colors uppercase"
     />
   )
 }
