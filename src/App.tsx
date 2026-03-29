@@ -15,9 +15,9 @@ function App() {
           <h1 className="bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-400 bg-clip-text text-4xl font-black tracking-tighter text-transparent sm:text-5xl uppercase italic drop-shadow-[0_0_15px_rgba(192,132,252,0.3)]">
             Not To Do List
           </h1>
-          <p className="mt-3 text-base font-medium tracking-wide text-zinc-400">
+          {/* <p className="mt-3 text-base font-medium tracking-wide text-zinc-400">
             Tap any item to reveal its description
-          </p>
+          </p> */}
         </header>
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-3 md:gap-6">
           <NotToDo />
