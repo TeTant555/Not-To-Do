@@ -2,7 +2,69 @@
   "hash": "164d7f9b",
   "configHash": "ab18aee4",
   "lockfileHash": "1b5f3e25",
-  "browserHash": "7ef936c0",
-  "optimized": {},
-  "chunks": {}
+  "browserHash": "f7b2a779",
+  "optimized": {
+    "@radix-ui/react-dialog": {
+      "src": "../../node_modules/.pnpm/@radix-ui+react-dialog@1.1._779045218dc2799d336e7197abef9d38/node_modules/@radix-ui/react-dialog/dist/index.mjs",
+      "file": "@radix-ui_react-dialog.js",
+      "fileHash": "8ddc913d",
+      "needsInterop": false
+    },
+    "class-variance-authority": {
+      "src": "../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.mjs",
+      "file": "class-variance-authority.js",
+      "fileHash": "1214abe5",
+      "needsInterop": false
+    },
+    "lucide-react": {
+      "src": "../../node_modules/.pnpm/lucide-react@0.577.0_react@19.2.4/node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "a3bd1ffc",
+      "needsInterop": false
+    },
+    "radix-ui": {
+      "src": "../../node_modules/.pnpm/radix-ui@1.4.3_@types+react_8630af8f756c6a5269f4297295494860/node_modules/radix-ui/dist/index.mjs",
+      "file": "radix-ui.js",
+      "fileHash": "b55d1200",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "1714e37a",
+      "needsInterop": true
+    },
+    "react-redux": {
+      "src": "../../node_modules/.pnpm/react-redux@9.2.0_@types+re_8dddbfbcd4bd7a0f43088bcd5827b3cd/node_modules/react-redux/dist/react-redux.mjs",
+      "file": "react-redux.js",
+      "fileHash": "63aa339c",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../node_modules/.pnpm/react@19.2.4/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "94ead425",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/.pnpm/react@19.2.4/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "9045d99b",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "dist-d4dhcgTt": {
+      "file": "dist-d4dhcgTt.js",
+      "isDynamicEntry": false
+    },
+    "react--WRKu3Vm": {
+      "file": "react--WRKu3Vm.js",
+      "isDynamicEntry": false
+    },
+    "react-dom-C8nfHGDw": {
+      "file": "react-dom-C8nfHGDw.js",
+      "isDynamicEntry": false
+    }
+  }
 }
