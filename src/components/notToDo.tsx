@@ -1,7 +1,7 @@
-import { addTask } from '@/store/notToDo/slice'
+import { addTask } from '@/store/slice'
 import TaskColumn from './taskColumn'
 import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from '@/store/notToDo/store'
+import type { AppDispatch, RootState } from '@/store/store'
 
 export default function NotToDo() {
   const dispatch = useDispatch<AppDispatch>()
