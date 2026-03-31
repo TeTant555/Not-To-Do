@@ -1,4 +1,4 @@
-import { addTaskToDidItAnyway } from '@/store/slice'
+import { addTaskToDidItAnyway, deleteTaskFromDidItAnyway, editTaskInDidItAnyway } from '@/store/slice'
 import TaskColumn from './taskColumn'
 import { useDispatch, useSelector } from 'react-redux'
 import type { AppDispatch, RootState } from '@/store/store'
@@ -24,6 +24,12 @@ export default function Tempted() {
           ? Math.max(...tasks.map((task) => task.id)) + 1
           : 1;
         dispatch(addTaskToDidItAnyway({ id: nextId, title }));
+      }}
+      onDeleteTask={(id) => {
+        dispatch(deleteTaskFromDidItAnyway(id))
+      }}
+      onEditTask={(id, title) => {
+        dispatch(editTaskInDidItAnyway({ id, title }))
       }}
     />
   )

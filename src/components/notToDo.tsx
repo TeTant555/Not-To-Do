@@ -1,4 +1,4 @@
-import { addTaskToNotToDo } from '@/store/slice'
+import { addTaskToNotToDo, deleteTaskFromNotToDo, editTaskInNotToDo } from '@/store/slice'
 import TaskColumn from './taskColumn'
 import { useDispatch, useSelector } from 'react-redux'
 import type { AppDispatch, RootState } from '@/store/store'
@@ -24,6 +24,12 @@ export default function NotToDo() {
           ? Math.max(...tasks.map((task) => task.id)) + 1
           : 1;
         dispatch(addTaskToNotToDo({ id: nextId, title }));
+      }}
+      onDeleteTask={(id) => {
+        dispatch(deleteTaskFromNotToDo(id))
+      }}
+      onEditTask={(id, title) => {
+        dispatch(editTaskInNotToDo({ id, title }))
       }}
     />
   )

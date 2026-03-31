@@ -27,6 +27,7 @@ const taskSlice = createSlice({
     name: 'task',
     initialState,
     reducers: {
+        // ADD
         addTaskToNotToDo: (state, action: PayloadAction<Task>) => {
             state.notToDoTasks.push(action.payload)
         },
@@ -35,9 +36,50 @@ const taskSlice = createSlice({
         },
         addTaskToDidItAnyway: (state, action: PayloadAction<Task>) => {
             state.didItAnywayTasks.push(action.payload)
+        },
+
+        // DELETE
+        deleteTaskFromNotToDo: (state, action: PayloadAction<number>) => {
+            state.notToDoTasks = state.notToDoTasks.filter(task => task.id !== action.payload)
+        },
+        deleteTaskFromTempted: (state, action: PayloadAction<number>) => {
+            state.temptedTasks = state.temptedTasks.filter(task => task.id !== action.payload)
+        },
+        deleteTaskFromDidItAnyway: (state, action: PayloadAction<number>) => {
+            state.didItAnywayTasks = state.didItAnywayTasks.filter(task => task.id !== action.payload)
+        },
+
+        // EDIT
+        editTaskInNotToDo: (state, action: PayloadAction<Task>) => {
+            const index = state.notToDoTasks.findIndex(task => task.id === action.payload.id)
+            if (index !== -1) {
+                state.notToDoTasks[index] = action.payload
+            }
+        },
+        editTaskInTempted: (state, action: PayloadAction<Task>) => {
+            const index = state.temptedTasks.findIndex(task => task.id === action.payload.id)
+            if (index !== -1) {
+                state.temptedTasks[index] = action.payload
+            }
+        },
+        editTaskInDidItAnyway: (state, action: PayloadAction<Task>) => {
+            const index = state.didItAnywayTasks.findIndex(task => task.id === action.payload.id)
+            if (index !== -1) {
+                state.didItAnywayTasks[index] = action.payload
+            }
         }
     }
 })
 
-export const { addTaskToNotToDo, addTaskToTempted, addTaskToDidItAnyway } = taskSlice.actions
+export const { 
+    addTaskToNotToDo, 
+    addTaskToTempted, 
+    addTaskToDidItAnyway, 
+    deleteTaskFromNotToDo, 
+    deleteTaskFromTempted, 
+    deleteTaskFromDidItAnyway,
+    editTaskInNotToDo,
+    editTaskInTempted,
+    editTaskInDidItAnyway
+} = taskSlice.actions
 export default taskSlice.reducer

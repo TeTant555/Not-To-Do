@@ -1,4 +1,4 @@
-import { addTaskToTempted } from '@/store/slice'
+import { addTaskToTempted, deleteTaskFromTempted, editTaskInTempted } from '@/store/slice'
 import TaskColumn from './taskColumn'
 import { useDispatch, useSelector } from 'react-redux'
 import type { AppDispatch, RootState } from '@/store/store'
@@ -24,6 +24,12 @@ export default function Tempted() {
           ? Math.max(...tasks.map((task) => task.id)) + 1
           : 1;
         dispatch(addTaskToTempted({ id: nextId, title }));
+      }}
+      onDeleteTask={(id) => {
+        dispatch(deleteTaskFromTempted(id))
+      }}
+      onEditTask={(id, title) => {
+        dispatch(editTaskInTempted({ id, title }))
       }}
     />
   )

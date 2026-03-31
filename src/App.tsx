@@ -10,7 +10,7 @@ function App() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-fuchsia-600/20 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-600/10 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="mx-auto max-w-5xl relative z-10">
+      <div className="mx-auto max-w-6xl relative z-10">
         <header className="mb-12 text-center">
           <h1 className="bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-400 bg-clip-text text-4xl font-black tracking-tighter text-transparent sm:text-5xl uppercase italic drop-shadow-[0_0_15px_rgba(192,132,252,0.3)]">
             Not To Do List
