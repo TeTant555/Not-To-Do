@@ -1,0 +1,55 @@
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 48px 24px;
+}
+
+#center h1 {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  color: #08060d;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  color: oklch(0.6 0.25 300);
+}
+
+.subtitle {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: #08060d;
+  font-weight: 500;
+  margin: 0;
+}
+
+.description {
+  font-size: 1rem;
+  color: #6b6375;
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
