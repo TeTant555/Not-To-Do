@@ -23,17 +23,21 @@ type Task = {
 type TaskColumnProps = {
   title: string
   initialTasks: Task[]
+  tasks?: Task[]
   cardClassName: string
   titleClassName: string
+  onAddTask?: (title: string) => void
 }
 
 export default function TaskColumn({
   title,
   initialTasks,
+  tasks,
   cardClassName,
   titleClassName,
+  onAddTask,
 }: TaskColumnProps) {
-  const [tasks, setTasks] = useState(initialTasks)
+  const [localTasks, setLocalTasks] = useState(initialTasks)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const inputId = useId()
@@ -55,17 +59,24 @@ export default function TaskColumn({
       return
     }
 
-    setTasks((currentTasks) => {
-      const nextId = currentTasks.reduce(
-        (highestId, task) => Math.max(highestId, task.id),
-        0
-      ) + 1
+    if (onAddTask) {
+      onAddTask(trimmedTitle)
+    } else {
+      setLocalTasks((currentTasks) => {
+        const nextId = currentTasks.reduce(
+          (highestId, task) => Math.max(highestId, task.id),
+          0,
+        ) + 1
 
-      return [...currentTasks, { id: nextId, title: trimmedTitle }]
-    })
+        return [...currentTasks, { id: nextId, title: trimmedTitle }]
+      })
+    }
+
     setNewTaskTitle('')
     setIsDialogOpen(false)
   }
+
+  const displayedTasks = tasks ?? localTasks
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl bg-zinc-950/50 backdrop-blur-xl p-5 shadow-2xl border border-zinc-800/50 relative overflow-hidden">
@@ -87,7 +98,7 @@ export default function TaskColumn({
       </div>
 
       <div className="flex flex-col gap-3">
-        {tasks.map((task) => (
+        {displayedTasks.map((task) => (
           <Card key={task.id} className={cardClassName}>
             <CardHeader className="p-4">
               <CardTitle className={titleClassName}>{task.title}</CardTitle>
