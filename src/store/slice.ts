@@ -6,26 +6,38 @@ type Task = {
 }
 
 type TaskState = {
-    tasks: Task[]
+    notToDoTasks: Task[]
+    temptedTasks: Task[]
+    didItAnywayTasks: Task[]
 }
 
 const initialState: TaskState = {
-    tasks: [
-        { id: 1, title: 'Check Social Media' },
-        { id: 2, title: 'Eat Junk Food' },
-        { id: 3, title: 'Hit Snooze' },
-    ]
+    notToDoTasks: localStorage.getItem('Not To Do')
+        ? JSON.parse(localStorage.getItem('Not To Do')!)
+        : [],
+    temptedTasks: localStorage.getItem('Tempted')
+        ? JSON.parse(localStorage.getItem('Tempted')!)
+        : [],
+    didItAnywayTasks: localStorage.getItem('Did It Anyway')
+        ? JSON.parse(localStorage.getItem('Did It Anyway')!)
+        : [],
 }
 
 const taskSlice = createSlice({
     name: 'task',
     initialState,
     reducers: {
-        addTask: (state, action: PayloadAction<Task>) => {
-            state.tasks.push(action.payload)
+        addTaskToNotToDo: (state, action: PayloadAction<Task>) => {
+            state.notToDoTasks.push(action.payload)
+        },
+        addTaskToTempted: (state, action: PayloadAction<Task>) => {
+            state.temptedTasks.push(action.payload)
+        },
+        addTaskToDidItAnyway: (state, action: PayloadAction<Task>) => {
+            state.didItAnywayTasks.push(action.payload)
         }
     }
 })
 
-export const { addTask } = taskSlice.actions
+export const { addTaskToNotToDo, addTaskToTempted, addTaskToDidItAnyway } = taskSlice.actions
 export default taskSlice.reducer
