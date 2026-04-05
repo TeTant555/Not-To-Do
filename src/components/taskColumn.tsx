@@ -120,13 +120,13 @@ export default function TaskColumn({
       <div className="flex flex-col gap-3">
         {displayedTasks.map((task) => (
           <Card key={task.id} className={cardClassName}>
-            <SquarePen className="absolute top-2 right-8 h-6 w-4 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            <SquarePen className="absolute top-2 right-8 h-6 w-4 text-zinc-500 hover:text-yellow-400 transition-colors cursor-pointer"
             onClick={() => {
               setEditingTaskId(task.id)
               setNewTaskTitle(task.title)
               setIsDialogOpen(true)
             }} />
-            <SquareX className="absolute top-2 right-2 h-6 w-4 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            <SquareX className="absolute top-2 right-2 h-6 w-4 text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
             onClick={() => onDeleteTask && onDeleteTask(task.id)} />
             <CardHeader className="p-4">
               <CardTitle className={titleClassName}>{task.title}</CardTitle>
@@ -168,7 +168,7 @@ export default function TaskColumn({
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" className="rounded-xl bg-zinc-100 text-zinc-950 font-bold shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-white hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-zinc-950 transition-all uppercase tracking-wide text-xs">
+              <Button type="submit" className="rounded-xl bg-zinc-100 text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-white hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-zinc-950 transition-all uppercase tracking-wide text-xs">
                 {editingTaskId ? 'Save changes' : 'Add item'}
               </Button>
             </DialogFooter>
