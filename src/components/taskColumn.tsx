@@ -1,9 +1,9 @@
-import { useId, useState } from 'react'
-import type { FormEvent } from 'react'
-import { Plus, SquareX, SquarePen } from 'lucide-react'
+import { useId, useState } from "react";
+import type { FormEvent } from "react";
+import { Plus, SquareX, SquarePen } from "lucide-react";
 
-import { Button } from './ui/button'
-import { Card, CardHeader, CardTitle } from './ui/card'
+import { Button } from "./ui/button";
+import { Card, CardHeader, CardTitle } from "./ui/card";
 import {
   Dialog,
   DialogClose,
@@ -12,24 +12,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog'
-import { Input } from './ui/input'
+} from "./ui/dialog";
+import { Input } from "./ui/input";
+import { useDraggable } from "@dnd-kit/core";
 
 type Task = {
-  id: number
-  title: string
-}
+  id: number;
+  title: string;
+};
 
 type TaskColumnProps = {
-  title: string
-  initialTasks: Task[]
-  tasks?: Task[]
-  cardClassName: string
-  titleClassName: string
-  onAddTask?: (title: string) => void
-  onDeleteTask?: (id: number) => void
-  onEditTask?: (id: number, newTitle: string) => void
-}
+  title: string;
+  initialTasks: Task[];
+  tasks?: Task[];
+  cardClassName: string;
+  titleClassName: string;
+  onAddTask?: (title: string) => void;
+  onDeleteTask?: (id: number) => void;
+  onEditTask?: (id: number, newTitle: string) => void;
+};
 
 export default function TaskColumn({
   title,
@@ -41,70 +42,111 @@ export default function TaskColumn({
   onDeleteTask,
   onEditTask,
 }: TaskColumnProps) {
-  const [localTasks, setLocalTasks] = useState(initialTasks)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [newTaskTitle, setNewTaskTitle] = useState('')
-  const [editingTaskId, setEditingTaskId] = useState<number | null>(null)
-  const inputId = useId()
+  const [localTasks, setLocalTasks] = useState(initialTasks);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+  const inputId = useId();
 
   const handleOpenChange = (open: boolean) => {
-    setIsDialogOpen(open)
+    setIsDialogOpen(open);
 
     if (!open) {
-      setNewTaskTitle('')
-      setEditingTaskId(null)
+      setNewTaskTitle("");
+      setEditingTaskId(null);
     }
-  }
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    const trimmedTitle = newTaskTitle.trim()
+    const trimmedTitle = newTaskTitle.trim();
 
     if (!trimmedTitle) {
-      return
+      return;
     }
 
     if (editingTaskId !== null) {
       if (onEditTask) {
-        onEditTask(editingTaskId, trimmedTitle)
+        onEditTask(editingTaskId, trimmedTitle);
       } else {
         setLocalTasks((currentTasks) =>
           currentTasks.map((task) =>
-            task.id === editingTaskId ? { ...task, title: trimmedTitle } : task
-          )
-        )
+            task.id === editingTaskId ? { ...task, title: trimmedTitle } : task,
+          ),
+        );
       }
     } else {
       if (onAddTask) {
-        onAddTask(trimmedTitle)
+        onAddTask(trimmedTitle);
       } else {
         setLocalTasks((currentTasks) => {
           const nextId =
             currentTasks.reduce(
               (highestId, task) => Math.max(highestId, task.id),
               0,
-            ) + 1
+            ) + 1;
 
-          return [...currentTasks, { id: nextId, title: trimmedTitle }]
-        })
+          return [...currentTasks, { id: nextId, title: trimmedTitle }];
+        });
       }
     }
 
-    setNewTaskTitle('')
-    setEditingTaskId(null)
-    setIsDialogOpen(false)
+    setNewTaskTitle("");
+    setEditingTaskId(null);
+    setIsDialogOpen(false);
+  };
+
+  function DraggableTask({ task }: { task: Task }) {
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({
+      id: `task-${task.id}`,
+    });
+
+    const dragStyle = {
+      transform: transform
+        ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+        : undefined,
+      touchAction: "none",
+    };
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={dragStyle}
+        {...listeners}
+        {...attributes}
+        className="relative"
+      >
+        <Card className={cardClassName}>
+          <SquarePen
+            className="absolute top-2 right-8 h-6 w-4 text-zinc-500 hover:text-yellow-400 transition-colors cursor-pointer"
+            onClick={() => {
+              setEditingTaskId(task.id);
+              setNewTaskTitle(task.title);
+              setIsDialogOpen(true);
+            }}
+          />
+          <SquareX
+            className="absolute top-2 right-2 h-6 w-4 text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
+            onClick={() => onDeleteTask && onDeleteTask(task.id)}
+          />
+          <CardHeader className="p-4">
+            <CardTitle className={titleClassName}>{task.title}</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+    );
   }
 
-  const displayedTasks = tasks ?? localTasks
+  const displayedTasks = tasks ?? localTasks;
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl bg-zinc-950/50 backdrop-blur-xl p-5 shadow-2xl border border-zinc-800/50 relative overflow-hidden">
-      {/* Subtle top glare */}
       <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/50 to-transparent" />
-      
       <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
-        <h2 className="text-xl font-black text-zinc-100 uppercase tracking-widest">{title}</h2>
+        <h2 className="text-xl font-black text-zinc-100 uppercase tracking-widest">
+          {title}
+        </h2>
         <Button
           type="button"
           variant="outline"
@@ -119,19 +161,7 @@ export default function TaskColumn({
 
       <div className="flex flex-col gap-3">
         {displayedTasks.map((task) => (
-          <Card key={task.id} className={cardClassName}>
-            <SquarePen className="absolute top-2 right-8 h-6 w-4 text-zinc-500 hover:text-yellow-400 transition-colors cursor-pointer"
-            onClick={() => {
-              setEditingTaskId(task.id)
-              setNewTaskTitle(task.title)
-              setIsDialogOpen(true)
-            }} />
-            <SquareX className="absolute top-2 right-2 h-6 w-4 text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
-            onClick={() => onDeleteTask && onDeleteTask(task.id)} />
-            <CardHeader className="p-4">
-              <CardTitle className={titleClassName}>{task.title}</CardTitle>
-            </CardHeader>
-          </Card>
+          <DraggableTask key={task.id} task={task} />
         ))}
       </div>
 
@@ -140,16 +170,28 @@ export default function TaskColumn({
           <div className="bg-gradient-to-r from-zinc-900 to-zinc-950 px-6 py-5 border-b border-zinc-800/80 relative">
             <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-fuchsia-500/20 via-cyan-400/50 to-fuchsia-500/20" />
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-zinc-100 uppercase tracking-wide">{editingTaskId ? 'Edit item' : 'Add new item'}</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-zinc-100 uppercase tracking-wide">
+                {editingTaskId ? "Edit item" : "Add new item"}
+              </DialogTitle>
               <DialogDescription className="text-zinc-400">
-                What are you trying to avoid in the <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 uppercase tracking-wider">{title}</span> column?
+                What are you trying to avoid in the{" "}
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 uppercase tracking-wider">
+                  {title}
+                </span>{" "}
+                column?
               </DialogDescription>
             </DialogHeader>
           </div>
 
-          <form className="flex flex-col gap-5 px-6 py-5" onSubmit={handleSubmit}>
+          <form
+            className="flex flex-col gap-5 px-6 py-5"
+            onSubmit={handleSubmit}
+          >
             <div className="flex flex-col gap-2 text-left">
-              <label htmlFor={inputId} className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+              <label
+                htmlFor={inputId}
+                className="text-xs font-bold text-zinc-400 uppercase tracking-wider"
+              >
                 Item name
               </label>
               <Input
@@ -164,17 +206,24 @@ export default function TaskColumn({
 
             <DialogFooter className="mt-2 text-right">
               <DialogClose asChild>
-                <Button type="button" variant="outline" className="rounded-xl border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+                >
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit" className="rounded-xl bg-zinc-100 text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-white hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-zinc-950 transition-all uppercase tracking-wide text-xs">
-                {editingTaskId ? 'Save changes' : 'Add item'}
+              <Button
+                type="submit"
+                className="rounded-xl bg-zinc-100 text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-white hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-zinc-950 transition-all uppercase tracking-wide text-xs"
+              >
+                {editingTaskId ? "Save changes" : "Add item"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

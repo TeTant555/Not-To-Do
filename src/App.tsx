@@ -2,6 +2,7 @@ import './App.css'
 import DidItAnyway from './components/didItAnyway'
 import NotToDo from './components/notToDo'
 import Tempted from './components/tempted'
+import { DndContext } from "@dnd-kit/core";
 
 function App() {
   return (
@@ -20,9 +21,15 @@ function App() {
           </p> */}
         </header>
         <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-3 md:gap-6">
-          <NotToDo />
-          <Tempted />
-          <DidItAnyway />
+          <DndContext>
+            <NotToDo />
+          </DndContext>
+          <DndContext>
+            <Tempted />
+          </DndContext>
+          <DndContext>
+            <DidItAnyway />
+          </DndContext>
         </div>
       </div>
     </div>
