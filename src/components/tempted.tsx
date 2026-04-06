@@ -9,7 +9,11 @@ export default function Tempted() {
   const tasks = useSelector((state: RootState) => state.tasks.temptedTasks)
 
   useEffect(() => {
-    localStorage.setItem('Tempted', JSON.stringify(tasks))
+    const timeout = setTimeout(() => {
+    localStorage.setItem('Tempted', JSON.stringify(tasks));
+    }, 0);
+
+    return () => clearTimeout(timeout);
   }, [tasks]);
 
   return (
@@ -20,10 +24,7 @@ export default function Tempted() {
       cardClassName="bg-zinc-900 border-zinc-800 shadow-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(250,204,21,0.15)] hover:border-yellow-500/30 rounded-xl group relative overflow-hidden"
       titleClassName="text-sm font-bold tracking-wider text-zinc-300 group-hover:text-yellow-400 transition-colors uppercase"
       onAddTask={(title) => {
-        const nextId = tasks.length > 0 
-          ? Math.max(...tasks.map((task) => task.id)) + 1
-          : 1;
-        dispatch(addTaskToTempted({ id: nextId, title }));
+        dispatch(addTaskToTempted({ id: Date.now(), title }));
       }}
       onDeleteTask={(id) => {
         dispatch(deleteTaskFromTempted(id))

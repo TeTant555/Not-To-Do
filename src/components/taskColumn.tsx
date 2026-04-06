@@ -1,29 +1,83 @@
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { Plus, SquareX, SquarePen } from "lucide-react";
-
 import { Button } from "./ui/button";
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogClose, DialogContent, DialogDescription,
+  DialogFooter, DialogHeader, DialogTitle,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
-import { closestCenter, DndContext, type DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { useDispatch } from "react-redux";
-import { reorderTempted, reorderNotToDo, reorderDidItAnyway } from "@/store/slice";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-type Task = {
-  id: number;
-  title: string;
+type Task = { id: number; title: string };
+
+type DraggableTaskProps = {
+  task: Task;
+  cardClassName: string;
+  titleClassName: string;
+  onEdit: (id: number, title: string) => void;
+  onDelete: (id: number) => void;
+  isGhost?: boolean; // ✅ renders as faded placeholder when being dragged
 };
+
+export function DraggableTask({
+  task,
+  cardClassName,
+  titleClassName,
+  onEdit,
+  onDelete,
+  isGhost = false,
+}: DraggableTaskProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id.toString(),
+  });
+
+  const dragStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  // ✅ When this card is the one being dragged, show a dim ghost in its place
+  // The actual floating card is rendered via DragOverlay in App.tsx
+  if (isDragging) {
+    return (
+      <div ref={setNodeRef} style={dragStyle} className="opacity-30 rounded-xl">
+        <Card className={cardClassName}>
+          <CardHeader className="p-4">
+            <CardTitle className={titleClassName}>{task.title}</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={dragStyle}
+      {...listeners}
+      {...attributes}
+      className={`relative ${isGhost ? "opacity-30" : ""}`}
+    >
+      <Card className={cardClassName}>
+        <SquarePen
+          className="absolute top-2 right-8 h-6 w-4 text-zinc-500 hover:text-yellow-400 transition-colors cursor-pointer"
+          onClick={() => onEdit(task.id, task.title)}
+        />
+        <SquareX
+          className="absolute top-2 right-2 h-6 w-4 text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
+          onClick={() => onDelete(task.id)}
+        />
+        <CardHeader className="p-4">
+          <CardTitle className={titleClassName}>{task.title}</CardTitle>
+        </CardHeader>
+      </Card>
+    </div>
+  );
+}
 
 type TaskColumnProps = {
   title: string;
@@ -52,48 +106,60 @@ export default function TaskColumn({
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const inputId = useId();
   const displayedTasks = tasks ?? localTasks;
-  const dispatch = useDispatch();
+
+  // ✅ The droppable ref is on the INNER list div, not the outer column wrapper
+  // This gives dnd-kit a tight, accurate drop zone
+  const { setNodeRef } = useDroppable({ id: title });
+
+  const taskIds = useMemo(
+    () => displayedTasks.map((task) => task.id.toString()),
+    [displayedTasks]
+  );
 
   const handleOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
-
     if (!open) {
       setNewTaskTitle("");
       setEditingTaskId(null);
     }
   };
 
+  const handleEditClick = (id: number, currentTitle: string) => {
+    setEditingTaskId(id);
+    setNewTaskTitle(currentTitle);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteClick = (id: number) => {
+    if (onDeleteTask) {
+      onDeleteTask(id);
+    } else {
+      setLocalTasks((current) => current.filter((t) => t.id !== id));
+    }
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const trimmedTitle = newTaskTitle.trim();
-
-    if (!trimmedTitle) {
-      return;
-    }
+    if (!trimmedTitle) return;
 
     if (editingTaskId !== null) {
       if (onEditTask) {
         onEditTask(editingTaskId, trimmedTitle);
       } else {
-        setLocalTasks((currentTasks) =>
-          currentTasks.map((task) =>
-            task.id === editingTaskId ? { ...task, title: trimmedTitle } : task,
-          ),
+        setLocalTasks((current) =>
+          current.map((task) =>
+            task.id === editingTaskId ? { ...task, title: trimmedTitle } : task
+          )
         );
       }
     } else {
       if (onAddTask) {
         onAddTask(trimmedTitle);
       } else {
-        setLocalTasks((currentTasks) => {
-          const nextId =
-            currentTasks.reduce(
-              (highestId, task) => Math.max(highestId, task.id),
-              0,
-            ) + 1;
-
-          return [...currentTasks, { id: nextId, title: trimmedTitle }];
+        setLocalTasks((current) => {
+          const nextId = current.reduce((max, t) => Math.max(max, t.id), 0) + 1;
+          return [...current, { id: nextId, title: trimmedTitle }];
         });
       }
     }
@@ -103,76 +169,11 @@ export default function TaskColumn({
     setIsDialogOpen(false);
   };
 
-  const DraggableTask = ({ task }: { task: Task }) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-      id: task.id,
-    });
-
-    const dragStyle = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-      zIndex: isDragging ? 999 : "auto",
-      position: isDragging ? "relative" as React.CSSProperties["position"] : "static" as React.CSSProperties["position"],
-    };
-
-    return (
-      <div
-        ref={setNodeRef}
-        style={dragStyle}
-        {...listeners}
-        {...attributes}
-        className={`relative ${isDragging ? "opacity-90 scale-105 shadow-2xl" : ""}`}
-      >
-        <Card className={cardClassName}>
-          <SquarePen
-            className="absolute top-2 right-8 h-6 w-4 text-zinc-500 hover:text-yellow-400 transition-colors cursor-pointer"
-            onClick={() => {
-              setEditingTaskId(task.id);
-              setNewTaskTitle(task.title);
-              setIsDialogOpen(true);
-            }}
-          />
-          <SquareX
-            className="absolute top-2 right-2 h-6 w-4 text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
-            onClick={() => onDeleteTask && onDeleteTask(task.id)}
-          />
-          <CardHeader className="p-4">
-            <CardTitle className={titleClassName}>{task.title}</CardTitle>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-
-    if (!over || active.id === over.id) return
-
-    const oldIndex = displayedTasks.findIndex(t => t.id === active.id)
-    const newIndex = displayedTasks.findIndex(t => t.id === over.id)
-    const newTasks = arrayMove(displayedTasks, oldIndex, newIndex)
-
-    if (tasks) {
-      if (title === "TEMPTED") {
-        dispatch(reorderTempted(newTasks));
-      } else if (title === "NOT TO DO") {
-        dispatch(reorderNotToDo(newTasks));
-      } else if (title === "DID IT ANYWAY") {
-        dispatch(reorderDidItAnyway(newTasks));
-      }
-    } else {
-      setLocalTasks(newTasks);
-    }
-  }
-
   return (
     <div className="flex flex-col gap-4 rounded-2xl bg-zinc-950/50 backdrop-blur-xl p-5 shadow-2xl border border-zinc-800/50 relative overflow-hidden">
       <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-zinc-600/50 to-transparent" />
       <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
-        <h2 className="text-xl font-black text-zinc-100 uppercase tracking-widest">
-          {title}
-        </h2>
+        <h2 className="text-xl font-black text-zinc-100 uppercase tracking-widest">{title}</h2>
         <Button
           type="button"
           variant="outline"
@@ -185,21 +186,21 @@ export default function TaskColumn({
         </Button>
       </div>
 
-      
-      <DndContext 
-        collisionDetection={closestCenter} 
-        onDragEnd={handleDragEnd}>
-        <SortableContext
-          items={displayedTasks.map(task => task.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="flex flex-col gap-3">
+      {/* ✅ Droppable ref is on the list container — tight and accurate */}
+      <div ref={setNodeRef} className="flex flex-col gap-3 min-h-[2rem]">
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {displayedTasks.map((task) => (
-            <DraggableTask key={task.id} task={task} />
+            <DraggableTask
+              key={task.id}
+              task={task}
+              cardClassName={cardClassName}
+              titleClassName={titleClassName}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
+            />
           ))}
-            </div>
         </SortableContext>
-      </DndContext>
+      </div>
 
       <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)] sm:max-w-md">
@@ -218,42 +219,27 @@ export default function TaskColumn({
               </DialogDescription>
             </DialogHeader>
           </div>
-
-          <form
-            className="flex flex-col gap-5 px-6 py-5"
-            onSubmit={handleSubmit}
-          >
+          <form className="flex flex-col gap-5 px-6 py-5" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2 text-left">
-              <label
-                htmlFor={inputId}
-                className="text-xs font-bold text-zinc-400 uppercase tracking-wider"
-              >
+              <label htmlFor={inputId} className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                 Item name
               </label>
               <Input
                 id={inputId}
                 value={newTaskTitle}
-                onChange={(event) => setNewTaskTitle(event.target.value)}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
                 placeholder="e.g., Target locked..."
                 className="rounded-xl border-zinc-800 bg-zinc-900 px-4 py-6 text-base text-zinc-200 transition-all focus-visible:bg-zinc-800/50 focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:border-cyan-500 placeholder:text-zinc-600"
                 autoFocus
               />
             </div>
-
             <DialogFooter className="mt-2 text-right">
               <DialogClose asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-xl border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
-                >
+                <Button type="button" variant="outline" className="rounded-xl border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors">
                   Cancel
                 </Button>
               </DialogClose>
-              <Button
-                type="submit"
-                className="rounded-xl bg-zinc-100 text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:bg-white hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-zinc-950 transition-all uppercase tracking-wide text-xs"
-              >
+              <Button type="submit" className="rounded-xl bg-zinc-100 text-zinc-950 hover:bg-white transition-all uppercase tracking-wide text-xs">
                 {editingTaskId ? "Save changes" : "Add item"}
               </Button>
             </DialogFooter>
