@@ -14,7 +14,11 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
-import { useDraggable } from "@dnd-kit/core";
+import { closestCenter, DndContext, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { useDispatch } from "react-redux";
+import { reorderTempted, reorderNotToDo, reorderDidItAnyway } from "@/store/slice";
 
 type Task = {
   id: number;
@@ -47,6 +51,8 @@ export default function TaskColumn({
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const inputId = useId();
+  const displayedTasks = tasks ?? localTasks;
+  const dispatch = useDispatch();
 
   const handleOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
@@ -97,16 +103,14 @@ export default function TaskColumn({
     setIsDialogOpen(false);
   };
 
-  function DraggableTask({ task }: { task: Task }) {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({
-      id: `task-${task.id}`,
+  const DraggableTask = ({ task }: { task: Task }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+      id: task.id,
     });
 
     const dragStyle = {
-      transform: transform
-        ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-        : undefined,
-      touchAction: "none",
+      transform: CSS.Transform.toString(transform),
+      transition,
     };
 
     return (
@@ -138,7 +142,27 @@ export default function TaskColumn({
     );
   }
 
-  const displayedTasks = tasks ?? localTasks;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over || active.id === over.id) return
+
+    const oldIndex = displayedTasks.findIndex(t => t.id === active.id)
+    const newIndex = displayedTasks.findIndex(t => t.id === over.id)
+    const newTasks = arrayMove(displayedTasks, oldIndex, newIndex)
+
+    if (tasks) {
+      if (title === "TEMPTED") {
+        dispatch(reorderTempted(newTasks));
+      } else if (title === "NOT TO DO") {
+        dispatch(reorderNotToDo(newTasks));
+      } else if (title === "DID IT ANYWAY") {
+        dispatch(reorderDidItAnyway(newTasks));
+      }
+    } else {
+      setLocalTasks(newTasks);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl bg-zinc-950/50 backdrop-blur-xl p-5 shadow-2xl border border-zinc-800/50 relative overflow-hidden">
@@ -159,11 +183,26 @@ export default function TaskColumn({
         </Button>
       </div>
 
-      <div className="flex flex-col gap-3">
+      
+      <DndContext 
+        collisionDetection={closestCenter} 
+        onDragEnd={handleDragEnd}>
+        <SortableContext
+          items={displayedTasks.map(task => task.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="flex flex-col gap-3">
+          {displayedTasks.map((task) => (
+            <DraggableTask key={task.id} task={task} />
+          ))}
+            </div>
+        </SortableContext>
+      </DndContext>
+      {/* <div className="flex flex-col gap-3">
         {displayedTasks.map((task) => (
           <DraggableTask key={task.id} task={task} />
         ))}
-      </div>
+      </div> */}
 
       <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)] sm:max-w-md">

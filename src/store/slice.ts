@@ -67,7 +67,18 @@ const taskSlice = createSlice({
             if (index !== -1) {
                 state.didItAnywayTasks[index] = action.payload
             }
-        }
+        },
+
+        // REORDER
+        reorderNotToDo: (state, action: PayloadAction<Task[]>) => {
+            state.notToDoTasks = action.payload
+        },
+        reorderTempted: (state, action: PayloadAction<Task[]>) => {
+            state.temptedTasks = action.payload
+        },
+        reorderDidItAnyway: (state, action: PayloadAction<Task[]>) => {
+            state.didItAnywayTasks = action.payload
+        },
     }
 })
 
@@ -80,6 +91,9 @@ export const {
     deleteTaskFromDidItAnyway,
     editTaskInNotToDo,
     editTaskInTempted,
-    editTaskInDidItAnyway
+    editTaskInDidItAnyway,
+    reorderNotToDo,
+    reorderTempted,
+    reorderDidItAnyway
 } = taskSlice.actions
 export default taskSlice.reducer
