@@ -5,6 +5,7 @@ import Tempted from './components/tempted'
 import { DndContext } from "@dnd-kit/core";
 
 function App() {
+
   return (
     <div className="min-h-screen bg-black bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black px-6 py-12 font-sans overflow-hidden relative">
       {/* Neon glowing orb and grid lines for cyberpunk aesthetic */}
@@ -20,15 +21,13 @@ function App() {
             Tap any item to reveal its description
           </p> */}
         </header>
-        <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-3 md:gap-6">
+        <div>
           <DndContext>
-            <NotToDo />
-          </DndContext>
-          <DndContext>
-            <Tempted />
-          </DndContext>
-          <DndContext>
-            <DidItAnyway />
+            <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-3 md:gap-6">
+              <NotToDo />
+              <Tempted />
+              <DidItAnyway />
+            </div>
           </DndContext>
         </div>
       </div>

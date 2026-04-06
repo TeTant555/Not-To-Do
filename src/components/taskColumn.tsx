@@ -104,13 +104,15 @@ export default function TaskColumn({
   };
 
   const DraggableTask = ({ task }: { task: Task }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id: task.id,
     });
 
     const dragStyle = {
       transform: CSS.Transform.toString(transform),
       transition,
+      zIndex: isDragging ? 999 : "auto",
+      position: isDragging ? "relative" as React.CSSProperties["position"] : "static" as React.CSSProperties["position"],
     };
 
     return (
@@ -119,7 +121,7 @@ export default function TaskColumn({
         style={dragStyle}
         {...listeners}
         {...attributes}
-        className="relative"
+        className={`relative ${isDragging ? "opacity-90 scale-105 shadow-2xl" : ""}`}
       >
         <Card className={cardClassName}>
           <SquarePen
@@ -198,11 +200,6 @@ export default function TaskColumn({
             </div>
         </SortableContext>
       </DndContext>
-      {/* <div className="flex flex-col gap-3">
-        {displayedTasks.map((task) => (
-          <DraggableTask key={task.id} task={task} />
-        ))}
-      </div> */}
 
       <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)] sm:max-w-md">
